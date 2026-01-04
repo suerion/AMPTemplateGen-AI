@@ -28,6 +28,7 @@
       font-size: 0.9rem;
       margin-top: -2rem;
     }
+    pre { background: #f4f4f4; padding: 1rem; white-space: pre-wrap; }
   </style>
 </head>
 <body>
@@ -60,49 +61,45 @@
   <label id="label_exe_linux" for="exe_linux">Linux-Executable</label>
   <input type="text" id="exe_linux" placeholder="z. B. server.x86_64">
 
-  <label id="label_port" for="port">Haupt-Port (z. B. Game-Port)</label>
+  <label id="label_workingdir" for="working_dir">Arbeitsverzeichnis</label>
+  <input type="text" id="working_dir" placeholder="z. B. ./896660">
+
+  <label id="label_startargs" for="start_args">Startparameter (mit {{Platzhaltern}})</label>
+  <textarea id="start_args" placeholder="z. B. -name {{ServerName}} -port {{ApplicationPort1}}"></textarea>
+
+  <label id="label_port" for="port">Haupt-Port (Game-Port)</label>
   <input type="number" id="port" placeholder="z. B. 27015">
+
+  <label id="label_port_proto" for="port_proto">Protokoll</label>
+  <select id="port_proto">
+    <option value="UDP">UDP</option>
+    <option value="TCP">TCP</option>
+    <option value="Both">Beides</option>
+  </select>
+
+  <label for="server_name">Konfig: Servername</label>
+  <input type="text" id="server_name" placeholder="z. B. Mein Server">
+
+  <label for="password">Konfig: Passwort</label>
+  <input type="text" id="password" placeholder="z. B. geheim">
+
+  <label for="max_players">Konfig: Max. Spieler</label>
+  <input type="number" id="max_players" value="8">
 
   <button onclick="generateTemplate()" id="generate_button">Template generieren</button>
 
-  <pre id="output"></pre>
+  <h2>Ausgabe: .kvp</h2>
+  <pre id="kvp_output"></pre>
+
+  <h2>Ausgabe: ports.json</h2>
+  <pre id="ports_output"></pre>
+
+  <h2>Ausgabe: config.json</h2>
+  <pre id="config_output"></pre>
 
   <script>
-    const texts = {
-      de: {
-        title: "AMP Template Generator",
-        label_app_name: "Anwendungsname",
-        label_app_desc: "Beschreibung",
-        label_os: "Unterstützte Betriebssysteme",
-        label_author: "Autor",
-        label_url: "Website oder Dokumentation",
-        label_exe_win: "Windows-Executable",
-        label_exe_linux: "Linux-Executable",
-        label_port: "Haupt-Port (z. B. Game-Port)",
-        generate_button: "Template generieren"
-      },
-      en: {
-        title: "AMP Template Generator",
-        label_app_name: "Application Name",
-        label_app_desc: "Description",
-        label_os: "Supported Operating Systems",
-        label_author: "Author",
-        label_url: "Website or Documentation",
-        label_exe_win: "Windows Executable",
-        label_exe_linux: "Linux Executable",
-        label_port: "Main Port (e.g. Game Port)",
-        generate_button: "Generate Template"
-      }
-    };
-
-    let currentLang = 'de';
-
     function switchLang(lang) {
-      currentLang = lang;
-      for (const key in texts[lang]) {
-        const el = document.getElementById(key);
-        if (el) el.textContent = texts[lang][key];
-      }
+      location.reload(); // einfache Umschaltung für statische Seite
     }
 
     function generateTemplate() {
@@ -112,19 +109,64 @@
       const url = document.getElementById('url').value;
       const exeWin = document.getElementById('exe_win').value;
       const exeLinux = document.getElementById('exe_linux').value;
+      const workingDir = document.getElementById('working_dir').value;
+      const startArgs = document.getElementById('start_args').value;
       const port = document.getElementById('port').value;
+      const portProto = document.getElementById('port_proto').value;
       const os = Array.from(document.getElementById('os').selectedOptions).map(opt => opt.value).join(', ');
 
-      const output = `Meta.DisplayName=${name}
+      const serverName = document.getElementById('server_name').value;
+      const password = document.getElementById('password').value;
+      const maxPlayers = document.getElementById('max_players').value;
+
+      const kvp = `Meta.DisplayName=${name}
 Meta.Description=${desc}
 Meta.Author=${author}
 Meta.URL=${url}
 Meta.OS=${os}
+Meta.ConfigManifest=${name.toLowerCase()}config.json
+App.DisplayName=${name}
 App.ExecutableWin=${exeWin}
 App.ExecutableLinux=${exeLinux}
-App.Ports=@IncludeJson[${name.toLowerCase()}ports.json]`;
+App.WorkingDir=${workingDir}
+App.CommandLineArgs=${startArgs}
+App.Ports=@IncludeJson[${name.toLowerCase()}ports.json]
+App.PrimaryApplicationPortRef=ApplicationPort1`;
 
-      document.getElementById('output').textContent = output;
+      const ports = JSON.stringify([
+        {
+          Name: "ApplicationPort1",
+          Description: "Primary game port",
+          Protocol: portProto,
+          Default: parseInt(port),
+          Type: "Game"
+        }
+      ], null, 2);
+
+      const config = JSON.stringify({
+        ServerName: {
+          DisplayName: "Servername",
+          Description: "Name des Servers im Spiel",
+          Type: "string",
+          Default: serverName
+        },
+        Password: {
+          DisplayName: "Passwort",
+          Description: "Zugangsschutz zum Server",
+          Type: "string",
+          Default: password
+        },
+        MaxPlayers: {
+          DisplayName: "Maximale Spieler",
+          Description: "Wie viele Spieler dürfen joinen?",
+          Type: "integer",
+          Default: parseInt(maxPlayers)
+        }
+      }, null, 2);
+
+      document.getElementById('kvp_output').textContent = kvp;
+      document.getElementById('ports_output').textContent = ports;
+      document.getElementById('config_output').textContent = config;
     }
   </script>
 </body>
