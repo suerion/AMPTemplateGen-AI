@@ -35,7 +35,7 @@
     Sprache: <button onclick="switchLang('de')">🇩🇪</button> <button onclick="switchLang('en')">🇬🇧</button>
   </div>
   <h1 id="title">AMP Template Generator</h1>
-  
+
   <label id="label_app_name" for="app_name">Anwendungsname</label>
   <input type="text" id="app_name" placeholder="z. B. Minecraft Server">
 
@@ -54,6 +54,15 @@
   <label id="label_url" for="url">Website oder Dokumentation</label>
   <input type="url" id="url" placeholder="https://example.com">
 
+  <label id="label_exe_win" for="exe_win">Windows-Executable</label>
+  <input type="text" id="exe_win" placeholder="z. B. server.exe">
+
+  <label id="label_exe_linux" for="exe_linux">Linux-Executable</label>
+  <input type="text" id="exe_linux" placeholder="z. B. server.x86_64">
+
+  <label id="label_port" for="port">Haupt-Port (z. B. Game-Port)</label>
+  <input type="number" id="port" placeholder="z. B. 27015">
+
   <button onclick="generateTemplate()" id="generate_button">Template generieren</button>
 
   <pre id="output"></pre>
@@ -67,6 +76,9 @@
         label_os: "Unterstützte Betriebssysteme",
         label_author: "Autor",
         label_url: "Website oder Dokumentation",
+        label_exe_win: "Windows-Executable",
+        label_exe_linux: "Linux-Executable",
+        label_port: "Haupt-Port (z. B. Game-Port)",
         generate_button: "Template generieren"
       },
       en: {
@@ -76,6 +88,9 @@
         label_os: "Supported Operating Systems",
         label_author: "Author",
         label_url: "Website or Documentation",
+        label_exe_win: "Windows Executable",
+        label_exe_linux: "Linux Executable",
+        label_port: "Main Port (e.g. Game Port)",
         generate_button: "Generate Template"
       }
     };
@@ -95,13 +110,19 @@
       const desc = document.getElementById('app_desc').value;
       const author = document.getElementById('author').value;
       const url = document.getElementById('url').value;
+      const exeWin = document.getElementById('exe_win').value;
+      const exeLinux = document.getElementById('exe_linux').value;
+      const port = document.getElementById('port').value;
       const os = Array.from(document.getElementById('os').selectedOptions).map(opt => opt.value).join(', ');
 
       const output = `Meta.DisplayName=${name}
 Meta.Description=${desc}
 Meta.Author=${author}
 Meta.URL=${url}
-Meta.OS=${os}`;
+Meta.OS=${os}
+App.ExecutableWin=${exeWin}
+App.ExecutableLinux=${exeLinux}
+App.Ports=@IncludeJson[${name.toLowerCase()}ports.json]`;
 
       document.getElementById('output').textContent = output;
     }
