@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <title>AMP Template Generator</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <style>
+    body {
+      font-family: sans-serif;
+      max-width: 800px;
+      margin: 2rem auto;
+      padding: 0 1rem;
+    }
+    h1 { font-size: 1.8rem; }
+    label { display: block; margin-top: 1rem; font-weight: bold; }
+    input, select, textarea {
+      width: 100%;
+      padding: 0.4rem;
+      margin-top: 0.2rem;
+    }
+    button {
+      margin-top: 2rem;
+      padding: 0.6rem 1.2rem;
+      font-size: 1rem;
+    }
+    .lang-switch {
+      float: right;
+      font-size: 0.9rem;
+      margin-top: -2rem;
+    }
+  </style>
+</head>
+<body>
+  <div class="lang-switch">
+    Sprache: <button onclick="switchLang('de')">🇩🇪</button> <button onclick="switchLang('en')">🇬🇧</button>
+  </div>
+  <h1 id="title">AMP Template Generator</h1>
+  
+  <label id="label_app_name" for="app_name">Anwendungsname</label>
+  <input type="text" id="app_name" placeholder="z. B. Minecraft Server">
+
+  <label id="label_app_desc" for="app_desc">Beschreibung</label>
+  <textarea id="app_desc" placeholder="z. B. Dedizierter Server für Minecraft Bedrock Edition"></textarea>
+
+  <label id="label_os">Unterstützte Betriebssysteme</label>
+  <select id="os" multiple>
+    <option value="Windows">Windows</option>
+    <option value="Linux">Linux</option>
+  </select>
+
+  <label id="label_author" for="author">Autor</label>
+  <input type="text" id="author" placeholder="z. B. suerion">
+
+  <label id="label_url" for="url">Website oder Dokumentation</label>
+  <input type="url" id="url" placeholder="https://example.com">
+
+  <button onclick="generateTemplate()" id="generate_button">Template generieren</button>
+
+  <pre id="output"></pre>
+
+  <script>
+    const texts = {
+      de: {
+        title: "AMP Template Generator",
+        label_app_name: "Anwendungsname",
+        label_app_desc: "Beschreibung",
+        label_os: "Unterstützte Betriebssysteme",
+        label_author: "Autor",
+        label_url: "Website oder Dokumentation",
+        generate_button: "Template generieren"
+      },
+      en: {
+        title: "AMP Template Generator",
+        label_app_name: "Application Name",
+        label_app_desc: "Description",
+        label_os: "Supported Operating Systems",
+        label_author: "Author",
+        label_url: "Website or Documentation",
+        generate_button: "Generate Template"
+      }
+    };
+
+    let currentLang = 'de';
+
+    function switchLang(lang) {
+      currentLang = lang;
+      for (const key in texts[lang]) {
+        const el = document.getElementById(key);
+        if (el) el.textContent = texts[lang][key];
+      }
+    }
+
+    function generateTemplate() {
+      const name = document.getElementById('app_name').value;
+      const desc = document.getElementById('app_desc').value;
+      const author = document.getElementById('author').value;
+      const url = document.getElementById('url').value;
+      const os = Array.from(document.getElementById('os').selectedOptions).map(opt => opt.value).join(', ');
+
+      const output = `Meta.DisplayName=${name}
+Meta.Description=${desc}
+Meta.Author=${author}
+Meta.URL=${url}
+Meta.OS=${os}`;
+
+      document.getElementById('output').textContent = output;
+    }
+  </script>
+</body>
+</html>
